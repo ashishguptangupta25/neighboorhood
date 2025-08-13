@@ -104,73 +104,131 @@ function Canvas({ elements, setElements, selectedElement, setSelectedElement, se
     const canvas = fabricCanvasRef.current;
     if (!canvas) return;
 
-    // Clear canvas
-    canvas.clear();
-    elementToFabricMap.current.clear();
+    // Get current fabric objects
+    const currentObjects = canvas.getObjects();
+    const currentElementIds = new Set(currentObjects.map(obj => obj.elementId));
+    const newElementIds = new Set(elements.map(el => el.id));
 
-    // Add all elements to canvas
-    elements.forEach((element) => {
-      let fabricObject;
-
-      if (element.type === 'building') {
-        fabricObject = new fabric.Rect({
-          left: element.x,
-          top: element.y,
-          fill: element.color,
-          width: element.width,
-          height: element.height,
-          selectable: true,
-          elementId: element.id,
-        });
-      } else if (element.type === 'road') {
-        const points = element.points || [element.x, element.y, element.x + 100, element.y];
-        fabricObject = new fabric.Line(points, {
-          stroke: element.color,
-          strokeWidth: element.width || 5,
-          selectable: true,
-          elementId: element.id,
-        });
-      } else if (element.type === 'business') {
-        fabricObject = new fabric.Circle({
-          left: element.x,
-          top: element.y,
-          radius: element.radius || 20,
-          fill: element.color,
-          selectable: true,
-          elementId: element.id,
-        });
+    // Remove objects that no longer exist in elements
+    currentObjects.forEach(obj => {
+      if (!newElementIds.has(obj.elementId)) {
+        canvas.remove(obj);
+        elementToFabricMap.current.delete(obj.elementId);
       }
+    });
 
-      if (fabricObject) {
-        canvas.add(fabricObject);
-        elementToFabricMap.current.set(element.id, fabricObject);
+    // Add or update elements
+    elements.forEach((element) => {
+      const existingObject = elementToFabricMap.current.get(element.id);
+      
+      if (existingObject) {
+        // Update existing object properties
+        const updates = {};
+        
+        if (element.type === 'building') {
+          updates.left = element.x;
+          updates.top = element.y;
+          updates.fill = element.color;
+          updates.width = element.width;
+          updates.height = element.height;
+        } else if (element.type === 'road') {
+          const points = element.points || [element.x, element.y, element.x + 100, element.y];
+          updates.x1 = points[0];
+          updates.y1 = points[1];
+          updates.x2 = points[2];
+          updates.y2 = points[3];
+          updates.stroke = element.color;
+          updates.strokeWidth = element.width || 5;
+        } else if (element.type === 'business') {
+          updates.left = element.x;
+          updates.top = element.y;
+          updates.radius = element.radius || 20;
+          updates.fill = element.color;
+        }
+        
+        // Apply updates and re-render
+        existingObject.set(updates);
+        existingObject.setCoords();
+        canvas.renderAll();
+        
+      } else if (!currentElementIds.has(element.id)) {
+        // Add new object
+        let fabricObject;
+
+        if (element.type === 'building') {
+          fabricObject = new fabric.Rect({
+            left: element.x,
+            top: element.y,
+            fill: element.color,
+            width: element.width,
+            height: element.height,
+            selectable: true,
+            elementId: element.id,
+          });
+        } else if (element.type === 'road') {
+          const points = element.points || [element.x, element.y, element.x + 100, element.y];
+          fabricObject = new fabric.Line(points, {
+            stroke: element.color,
+            strokeWidth: element.width || 5,
+            selectable: true,
+            elementId: element.id,
+          });
+        } else if (element.type === 'business') {
+          fabricObject = new fabric.Circle({
+            left: element.x,
+            top: element.y,
+            radius: element.radius || 20,
+            fill: element.color,
+            selectable: true,
+            elementId: element.id,
+          });
+        }
+
+        if (fabricObject) {
+          canvas.add(fabricObject);
+          elementToFabricMap.current.set(element.id, fabricObject);
+        }
       }
     });
 
     canvas.renderAll();
   }, [elements]);
 
-  // Handle element deletion
+  // Handle element deletion with keyboard
   const handleKeyDown = useCallback((e) => {
-    if (e.key === 'Delete' && selectedElement) {
+    if ((e.key === 'Delete' || e.key === 'Backspace') && selectedElement) {
+      e.preventDefault();
       const canvas = fabricCanvasRef.current;
       const fabricObject = elementToFabricMap.current.get(selectedElement.id);
       if (fabricObject) {
         canvas.remove(fabricObject);
+        canvas.renderAll();
       }
       // Remove from elements array
-      updateElement(selectedElement.id, null);
+      updateElementRef.current(selectedElement.id, null);
     }
-  }, [selectedElement, updateElement]);
+  }, [selectedElement]);
 
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    const canvas = fabricCanvasRef.current;
+    if (canvas) {
+      // Make canvas focusable for keyboard events
+      const canvasElement = canvas.getElement();
+      canvasElement.setAttribute('tabindex', '0');
+      canvasElement.addEventListener('keydown', handleKeyDown);
+      
+      return () => {
+        canvasElement.removeEventListener('keydown', handleKeyDown);
+      };
+    }
   }, [handleKeyDown]);
 
   return (
     <div className="canvas-container">
-      <canvas ref={canvasRef} tabIndex="0"></canvas>
+      <canvas ref={canvasRef} tabIndex="0" style={{outline: 'none'}}></canvas>
+      <div className="canvas-instructions">
+        <small>Click elements to select • Use Delete key to remove • Drag to move • Drag corners to resize</small>
+      </div>
     </div>
   );
 }

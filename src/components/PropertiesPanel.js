@@ -19,6 +19,12 @@ function PropertiesPanel({ selectedElement, updateElement, elements }) {
     updateElement(selectedElement.id, { [key]: numValue });
   };
 
+  const handleDelete = () => {
+    if (window.confirm(`Are you sure you want to delete "${selectedElement.name}"?`)) {
+      updateElement(selectedElement.id, null);
+    }
+  };
+
   const renderTypeSpecificFields = () => {
     switch (selectedElement.type) {
       case 'building':
@@ -139,6 +145,16 @@ function PropertiesPanel({ selectedElement, updateElement, elements }) {
 
       <div className="type-specific-properties">
         {renderTypeSpecificFields()}
+      </div>
+
+      <div className="property-group">
+        <button 
+          onClick={handleDelete}
+          className="delete-button"
+          type="button"
+        >
+          🗑️ Delete Element
+        </button>
       </div>
     </div>
   );

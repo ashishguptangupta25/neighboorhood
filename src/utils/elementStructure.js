@@ -100,19 +100,21 @@ export const fabricToElement = (fabricObject, originalElement) => {
     case 'building':
       return {
         ...baseUpdate,
-        width: fabricObject.width * fabricObject.scaleX,
-        height: fabricObject.height * fabricObject.scaleY,
+        width: fabricObject.width * (fabricObject.scaleX || 1),
+        height: fabricObject.height * (fabricObject.scaleY || 1),
       };
     case 'road':
       return {
         ...baseUpdate,
         points: [fabricObject.x1, fabricObject.y1, fabricObject.x2, fabricObject.y2],
         width: fabricObject.strokeWidth,
+        x: Math.min(fabricObject.x1, fabricObject.x2),
+        y: Math.min(fabricObject.y1, fabricObject.y2),
       };
     case 'business':
       return {
         ...baseUpdate,
-        radius: fabricObject.radius * fabricObject.scaleX,
+        radius: fabricObject.radius * (fabricObject.scaleX || 1),
       };
     default:
       return baseUpdate;
