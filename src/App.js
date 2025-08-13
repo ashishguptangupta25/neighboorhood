@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Canvas from './components/Canvas';
 import Toolbar from './components/Toolbar';
 import ExportImport from './components/ExportImport';
@@ -20,7 +21,7 @@ function App() {
 
   return (
     <div className="app">
-      <Toolbar setElements={setElements} />
+      <Toolbar elements={elements} setElements={setElements} />
       <Canvas
         elements={elements}
         setElements={setElements}
@@ -32,7 +33,7 @@ function App() {
         setElements={setElements}
         elements={elements}
       />
-      <ExportImport setElements={setElements} />
+      <ExportImport elements={elements} setElements={setElements} />
     </div>
   );
 }
