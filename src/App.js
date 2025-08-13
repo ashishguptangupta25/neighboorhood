@@ -9,14 +9,25 @@ function App() {
   const [elements, setElements] = useState([]);
   const [selectedElement, setSelectedElement] = useState(null);
 
+  // Load layout from localStorage on mount
   useEffect(() => {
     const savedLayout = loadLayoutFromLocalStorage();
-    if (savedLayout) setElements(savedLayout);
+    if (savedLayout && Array.isArray(savedLayout)) {
+      setElements(savedLayout);
+    }
   }, []);
 
+  // Save layout to localStorage whenever elements change
   useEffect(() => {
     saveLayoutToLocalStorage(elements);
   }, [elements]);
+
+  // Clear selection when element is deleted
+  useEffect(() => {
+    if (selectedElement && !elements.find(el => el.id === selectedElement.id)) {
+      setSelectedElement(null);
+    }
+  }, [elements, selectedElement]);
 
   return (
     <div className="app">
@@ -32,7 +43,7 @@ function App() {
         setElements={setElements}
         elements={elements}
       />
-      <ExportImport setElements={setElements} />
+      <ExportImport elements={elements} setElements={setElements} />
     </div>
   );
 }

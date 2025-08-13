@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { validateLayoutJson } from '../utils/validateJson';
 
 function ExportImport({ elements, setElements }) {
   const exportLayout = () => {
@@ -9,20 +11,29 @@ function ExportImport({ elements, setElements }) {
     link.href = url;
     link.download = 'neighborhood-layout.json';
     link.click();
+    URL.revokeObjectURL(url);
   };
 
   const importLayout = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
+    
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         const layout = JSON.parse(event.target.result);
-        setElements(layout);
+        if (validateLayoutJson(layout)) {
+          setElements(layout);
+        } else {
+          alert('Invalid JSON file format. Please ensure the file contains valid neighborhood layout data.');
+        }
       } catch (error) {
-        alert('Invalid JSON file format.');
+        alert('Invalid JSON file format. Unable to parse the file.');
       }
     };
     reader.readAsText(file);
+    // Reset file input
+    e.target.value = '';
   };
 
   return (
@@ -41,5 +52,10 @@ function ExportImport({ elements, setElements }) {
     </div>
   );
 }
+
+ExportImport.propTypes = {
+  elements: PropTypes.array.isRequired,
+  setElements: PropTypes.func.isRequired,
+};
 
 export default ExportImport;
