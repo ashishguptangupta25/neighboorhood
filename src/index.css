@@ -7,25 +7,167 @@ body {
   align-items: center;
 }
 
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
 .toolbar {
   display: flex;
   gap: 10px;
   margin: 10px;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+
+.toolbar button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.toolbar button:hover {
+  background-color: #e0e0e0;
+}
+
+.toolbar button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #0056b3;
+}
+
+.canvas-container {
+  margin: 10px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden;
 }
 
 .properties-panel {
-  margin-top: 10px;
+  margin: 10px;
   border: 1px solid #ccc;
-  padding: 10px;
+  padding: 15px;
   width: 300px;
+  background-color: #fafafa;
+  border-radius: 5px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.properties-panel h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.property-group {
+  margin-bottom: 15px;
+}
+
+.property-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+.property-group input,
+.property-group textarea {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.property-group input[type="color"] {
+  height: 35px;
+  cursor: pointer;
+}
+
+.property-group input[type="number"] {
+  max-width: 80px;
+}
+
+.type-specific-properties {
+  border-top: 1px solid #ddd;
+  padding-top: 15px;
+  margin-top: 15px;
 }
 
 .export-import {
   margin: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.export-import button {
+  padding: 8px 16px;
+  border: 1px solid #28a745;
+  background: #28a745;
+  color: white;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.export-import button:hover {
+  background-color: #218838;
+}
+
+.export-import button:disabled {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  cursor: not-allowed;
 }
 
 .import-button {
-  border: 1px solid #ccc;
-  padding: 5px;
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1px solid #17a2b8;
+  background: #17a2b8;
+  color: white;
   cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.import-button:hover {
+  background-color: #138496;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .app {
+    padding: 5px;
+  }
+  
+  .toolbar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .properties-panel {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .canvas-container canvas {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .export-import {
+    flex-direction: column;
+    gap: 5px;
+  }
 }
